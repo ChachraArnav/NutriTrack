@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NutriTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- LOGIN — shown by default, everything else starts hidden -->
+    <div id="login" class="screen auth-screen">
+        <div class="auth-logo">🥗</div>
+        <h2>Welcome back</h2>
+        <p class="auth-sub">Track your nutrition, hit your goals.</p>
+        <!-- input-group wraps the icon + input together -->
+        <div class="input-group">
+            <i class="fa fa-envelope"></i>
+            <input type="email" id="loginEmail" placeholder="Email address">
+        </div>
+        <div class="input-group">
+            <i class="fa fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Password">
+        </div>
+        <button class="btn-primary full-width" onclick="login()">Login</button>
+        <p class="auth-switch">No account? <a onclick="showRegister()">Register</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="register" class="screen auth-screen" style="display:none;">
+        <div class="auth-logo">🌱</div>
+        <h2>Create account</h2>
+        <p class="auth-sub">Start your nutrition journey today.</p>
+        <div class="input-group">
+            <i class="fa fa-envelope"></i>
+            <input type="email" id="registerEmail" placeholder="Email address">
+        </div>
+        <div class="input-group">
+            <i class="fa fa-lock"></i>
+            <input type="password" id="registerPassword" placeholder="Password">
+        </div>
+        <button class="btn-primary full-width" onclick="register()">Create Account</button>
+        <p class="auth-switch">Already registered? <a onclick="showLogin()">Login</a></p>
+    </div>
+
+    <!-- ONBOARDING — 5 steps, each is its own screen -->
+
+    <!-- step 0: name -->
+    <div id="step0" class="screen onboard-screen" style="display:none;">
+        <div class="step-indicator"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="step-icon">👤</div>
+        <h2>What's your name?</h2>
+        <input type="text" id="name" placeholder="Your first name">
+        <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
+    </div>
+
+    <!-- step 1: sex — hidden input holds the value, choice cards update it -->
+    <div id="step1" class="screen onboard-screen" style="display:none;">
+        <div class="step-indicator"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="step-icon">🧬</div>
+        <h2>Biological sex</h2>
+        <div class="choice-group">
+            <label class="choice-card" onclick="selectChoice(this, 'sex', 'male')">
+                <span>♂</span> Male
+            </label>
+            <label class="choice-card" onclick="selectChoice(this, 'sex', 'female')">
+                <span>♀</span> Female
+            </label>
+        </div>
+        <input type="hidden" id="sex" value="male">
+        <div class="step-nav">
+            <button class="btn-ghost" onclick="goBack(0)">← Back</button>
+            <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- step 2: weight -->
+    <div id="step2" class="screen onboard-screen" style="display:none;">
+        <div class="step-indicator"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="step-icon">⚖️</div>
+        <h2>Your weight</h2>
+        <!-- unit-input keeps the "kg" label pinned inside the field -->
+        <div class="unit-input">
+            <input type="number" id="weight" placeholder="e.g. 72">
+            <span class="unit-badge">kg</span>
+        </div>
+        <div class="step-nav">
+            <button class="btn-ghost" onclick="goBack(1)">← Back</button>
+            <button class="btn-primary" onclick="nextStep(3)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- step 3: height + age (both needed for Mifflin-St Jeor) -->
+    <div id="step3" class="screen onboard-screen" style="display:none;">
+        <div class="step-indicator"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+        <div class="step-icon">📏</div>
+        <h2>Your height & age</h2>
+        <div class="unit-input">
+            <input type="number" id="height" placeholder="e.g. 175">
+            <span class="unit-badge">cm</span>
+        </div>
+        <div class="unit-input">
+            <input type="number" id="age" placeholder="e.g. 25">
+            <span class="unit-badge">yrs</span>
+        </div>
+        <div class="step-nav">
+            <button class="btn-ghost" onclick="goBack(2)">← Back</button>
+            <button class="btn-primary" onclick="nextStep(4)">Continue →</button>
+        </div>
+    </div>
+
+    <!-- step 4: goal — same hidden input pattern as sex -->
+    <div id="step4" class="screen onboard-screen" style="display:none;">
+        <div class="step-indicator"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+        <div class="step-icon">🎯</div>
+        <h2>What's your goal?</h2>
+        <div class="choice-group col3">
+            <label class="choice-card" onclick="selectChoice(this, 'goalType', 'cut')">
+                <span>🔥</span> Lose Fat
+            </label>
+            <label class="choice-card" onclick="selectChoice(this, 'goalType', 'maintain')">
+                <span>⚖️</span> Maintain
+            </label>
+            <label class="choice-card" onclick="selectChoice(this, 'goalType', 'bulk')">
+                <span>💪</span> Gain Muscle
+            </label>
+        </div>
+        <input type="hidden" id="goalType" value="cut">
+        <div class="step-nav">
+            <button class="btn-ghost" onclick="goBack(3)">← Back</button>
+            <button class="btn-primary" onclick="startApp()">Let's go 🚀</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="screen" style="display:none;">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1 id="welcome"></h1>
+                <p id="date"></p>
+            </div>
+            <div class="topbar-right">
+                <span id="streakBadge" class="streak-badge"></span>
+                <button class="btn-icon logout-btn" title="Logout" onclick="logout()"><i class="fa fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- 3 quick-glance stats at the top -->
+        <div class="stats">
+            <div class="card stat-card calories-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-info">
+                    <span class="stat-label">Consumed</span>
+                    <span class="stat-value mono" id="calorieStatus">0 kcal</span>
+                </div>
+            </div>
+            <div class="card stat-card target-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <span class="stat-label">Target</span>
+                    <span class="stat-value mono" id="calorieGoal">— kcal</span>
+                </div>
+            </div>
+            <div class="card stat-card bmi-card">
+                <div class="stat-icon">💗</div>
+                <div class="stat-info">
+                    <span class="stat-label">BMI</span>
+                    <span class="stat-value mono" id="bmiResult">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- progress bar + health score — bar color is set by JS -->
+        <div class="card progress-card">
+            <div class="progress-header">
+                <h3>Today's Calories</h3>
+                <span id="healthScore" class="health-score-badge">Score: 100</span>
+            </div>
+            <div class="progress-track">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <p id="suggestion" class="suggestion-text"></p>
+        </div>
+
+        <!-- macro targets — populated by displayRecommendation() -->
+        <div class="card recommendation">
+            <h3>Your Daily Plan <span class="tag" id="goalTag"></span></h3>
+            <div id="recommendationBox" class="macro-grid"></div>
+        </div>
+
+        <div class="grid">
+
+            <div class="left-panel">
+
+                <!-- food logger — autocomplete dropdown is inside the wrap div -->
+                <div class="card add-food-card">
+                    <h3>Log Food</h3>
+                    <div class="autocomplete-wrap">
+                        <input type="text" id="foodName" placeholder="Food name" oninput="handleFoodInput()" autocomplete="off">
+                        <div id="autocompleteList" class="autocomplete-dropdown"></div>
+                    </div>
+                    <input type="number" id="calories" placeholder="Calories (kcal)">
+                    <button class="btn-primary full-width" onclick="addFood()">+ Add Entry</button>
+                </div>
+
+                <!-- water tracker — glasses rendered as emoji by JS -->
+                <div class="card hydration-card">
+                    <div class="section-title">
+                        <h3>Hydration</h3>
+                        <span id="waterStatus" class="mono">0 / 8</span>
+                    </div>
+                    <div id="waterGlasses" class="water-grid"></div>
+                    <progress id="waterProgress" value="0" max="8"></progress>
+                    <div class="water-footer">
+                        <p id="waterSuggestion" class="muted-text"></p>
+                        <button class="btn-ghost small" onclick="addWater()">+ Glass</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- charts — canvas size is overridden in CSS -->
+            <div class="right-panel">
+                <div class="card chart-card">
+                    <h3 class="chart-title">Weekly Calories</h3>
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <div class="card chart-card">
+                    <h3 class="chart-title">Today's Split</h3>
+                    <canvas id="calorieChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- history list — click a day to drill into its food entries -->
+        <div class="card history">
+            <div class="section-title">
+                <h3>History</h3>
+                <span class="muted-text" id="historyMeta"></span>
+            </div>
+            <ul id="historyList"></ul>
+        </div>
+
+    </div>
+</div>
+
+<!-- Chart.js before our script so it's available when the page loads -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
